@@ -59,11 +59,13 @@ Created a fixed sidebar with navigation links using React Icons:
 - LIVE
 - Login button
 
+![Alt text](https://github.com/AshisRai503/WEB101/blob/main/practical_1/tiktok-clone/Images/Screenshot%202026-03-15%20233535.png?raw=true)
 
 #### 2. Video Feed Components
 Implemented:
 - `VideoCard.jsx`: Reusable component for displaying individual videos with interaction buttons (like, comment, share)
 - `VideoFeed.js`: Container component that maps through dummy data to display multiple videos
+![Alt text](https://github.com/AshisRai503/WEB101/blob/main/practical_1/tiktok-clone/Images/Screenshot%202026-03-15%20233556.png?raw=true)
 
 #### 3. Additional Pages Created
 - Following page
@@ -72,11 +74,11 @@ Implemented:
 - Upload page with form fields
 - Profile page with user information
 
+
 #### 4. Authentication Forms
 Installed and implemented React Hook Form for validation:
 - Login page with email/password validation
-
-
+![Alt text](https://github.com/AshisRai503/WEB101/blob/main/practical_1/tiktok-clone/Images/Screenshot%202026-03-15%20233610.png?raw=true)
 
 - Signup page with:
   - Username validation (min 3 characters, alphanumeric+underscores)
@@ -84,3 +86,4 @@ Installed and implemented React Hook Form for validation:
   - Password validation (min 8 characters, complexity requirements)
   - Confirm password validation
   - Terms agreement checkbox
+  ![Alt text](https://github.com/AshisRai503/WEB101/blob/main/practical_1/tiktok-clone/Images/Screenshot%202026-03-15%20233638.png?raw=true)
