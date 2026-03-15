@@ -44,7 +44,7 @@ export default function VideoCard({ post }) {
             </div>
           </div>
 
-          {/* INTERACTION BUTTONS - NOW MORE VISIBLE */}
+          {/* INTERACTION BUTTONS */}
           <div className="flex flex-col justify-end space-y-4 py-2">
             {/* Like button */}
             <button 

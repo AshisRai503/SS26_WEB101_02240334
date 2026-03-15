@@ -60,7 +60,6 @@ Created a fixed sidebar with navigation links using React Icons:
 - Login button
 
 
-
 #### 2. Video Feed Components
 Implemented:
 - `VideoCard.jsx`: Reusable component for displaying individual videos with interaction buttons (like, comment, share)
@@ -76,6 +75,9 @@ Implemented:
 #### 4. Authentication Forms
 Installed and implemented React Hook Form for validation:
 - Login page with email/password validation
+
+
+
 - Signup page with:
   - Username validation (min 3 characters, alphanumeric+underscores)
   - Email validation (pattern matching)
