@@ -57,10 +57,8 @@ Modify src/app/layout.js to use your custom layout.
 ### Step 7: Create Basic Pages for Navigation
 
 Create the following files:
-
-    src/app/profile/page.jsx
-
-    src/app/upload/page.jsx
+src/app/profile/page.jsx
+src/app/upload/page.jsx
 
 ### Step 8: Start the Development Server
 
@@ -71,14 +69,10 @@ Visit http://localhost:3000
 ## Part 2 - Creating the Web Layout and Main Interface
 
 Objectives:
-
-    Sidebar navigation
-
-    Main content area
-
-    Basic video feed layout
-
-    Placeholder video components
+Sidebar navigation
+Main content area
+Basic video feed layout
+Placeholder video components
 
 ### Step 1: Install Additional Dependencies
 
@@ -185,53 +179,34 @@ Objectives:
 ### Step 2: Create Login Page
 
 Create src/app/login/page.jsx with:
-
-    Email and password fields
-
-    Required field validation
-
-    Email format validation
-
-    Forgot password link
-
-    Link to signup page
+Email and password fields   
+Required field validation
+Email format validation
+Forgot password link
+Link to signup page
 
 ### Step 3: Create Signup Page
 
 Create src/app/signup/page.jsx with:
-
-    Username field (min 3 chars, alphanumeric + underscore)
-
-    Email field (valid format)
-
-    Password field (min 8 chars, uppercase, lowercase, number, special char)
-
-    Confirm password field (must match)
-
-    Terms and conditions checkbox (required)
-
-    Link to login page
+Username field (min 3 chars, alphanumeric + underscore)
+Email field (valid format)
+Password field (min 8 chars, uppercase, lowercase, number, special char)
+Confirm password field (must match)
+Terms and conditions checkbox (required)
+Link to login page
 
 ### Step 4: Update MainLayout Component
 
 Update src/components/layout/MainLayout.jsx:
-
-    Add Login link in the sidebar
-
-    Update the Login button to link to the login page
+Add Login link in the sidebar
+Update the Login button to link to the login page
 
 ### Step 5: Test Form Validation
 
-Test the following scenarios:
-
-    Submit empty forms
-
-    Invalid email formats
-
-    Short passwords
-
-    Non-matching passwords
-
-    Unchecked terms
-
-    Successful submission with valid data
+Test the following scenarios: 
+Submit empty forms
+Invalid email formats
+Short passwords
+Non-matching passwords
+Unchecked termsSuccessful
+submission with valid data
