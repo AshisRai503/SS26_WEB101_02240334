@@ -1,4 +1,4 @@
-,,, bash ,,, 
+``` bash  
 SS26_WEB101_02240334/
 ├─ practical_1/
 │  └─ tiktok-clone/
@@ -40,4 +40,4 @@ SS26_WEB101_02240334/
 │              ├─ layout/
 │              └─ ui/
 
-,,, bash ,,,
+```
