@@ -39,5 +39,5 @@ SS26_WEB101_02240334/
 │           └─ components/
 │              ├─ layout/
 │              └─ ui/
-
 ```
+
