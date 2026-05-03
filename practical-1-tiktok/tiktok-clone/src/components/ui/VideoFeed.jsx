@@ -1,43 +1,68 @@
-'use client';
+"use client";
 
-import VideoCard from './VideoCard';
+import { useEffect, useState } from "react";
+import VideoCard from "./VideoCard";
+import { getVideos, getFollowingVideos } from "@/services/videoService";
 
-// Sample data for our feed
-const DUMMY_POSTS = [
-  {
-    id: '1',
-    username: '@user1',
-    caption: 'Check out this cool video! #trending #tiktok #viral',
-    audio: 'Original Sound - User1',
-    likes: 1234,
-    comments: 432,
-    shares: 89
-  },
-  {
-    id: '2',
-    username: '@user2',
-    caption: 'Learning to dance 💃 #dance #fun #trending',
-    audio: 'Popular Song - Artist',
-    likes: 5678,
-    comments: 321,
-    shares: 52
-  },
-  {
-    id: '3',
-    username: '@user3',
-    caption: 'Beautiful sunset today! #nature #sunset #vibes',
-    audio: 'Sunset Vibes - Chill Music',
-    likes: 2468,
-    comments: 135,
-    shares: 46
+export default function VideoFeed({ type = "foryou" }) {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  async function fetchVideos() {
+    try {
+      setLoading(true);
+      setError("");
+
+      let data;
+
+      if (type === "following") {
+        data = await getFollowingVideos();
+      } else {
+        data = await getVideos();
+      }
+
+      setVideos(data.videos || data || []);
+    } catch (err) {
+      console.log("Video fetch error:", err);
+      setError("Failed to load videos.");
+    } finally {
+      setLoading(false);
+    }
   }
-];
 
-export default function VideoFeed() {
+  useEffect(() => {
+    fetchVideos();
+  }, [type]);
+
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <p>Loading videos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (videos.length === 0) {
+    return (
+      <div className="p-6 text-center">
+        <p>No videos found.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-[550px] mx-auto">
-      {DUMMY_POSTS.map((post) => (
-        <VideoCard key={post.id} post={post} />
+    <div className="max-w-2xl mx-auto">
+      {videos.map((video) => (
+        <VideoCard key={video.id} video={video} />
       ))}
     </div>
   );

@@ -1,9 +1,12 @@
-import VideoFeed from '../components/ui/VideoFeed';
+import MainLayout from "@/components/layout/MainLayout";
+import VideoFeed from "../components/ui/VideoFeed";
 
 export default function Home() {
   return (
-    <div className="py-4">
-      <VideoFeed />
-    </div>
+    <MainLayout>
+      <div className="py-4">
+        <VideoFeed />
+      </div>
+    </MainLayout>
   );
 }

@@ -1,82 +1,108 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import {
-  FaHeart, FaRegHeart, FaComment,
-  FaShare, FaMusic
-} from 'react-icons/fa';
+import { useState } from "react";
+import Link from "next/link";
+import { FaHeart, FaComment, FaShare, FaMusic } from "react-icons/fa";
+import { useAuth } from "@/contexts/authContext";
+import { likeVideo, unlikeVideo } from "@/services/videoService";
+import toast from "react-hot-toast";
 
-export default function VideoCard({ post }) {
-  const [liked, setLiked] = useState(false);
+export default function VideoCard({ video }) {
+  const { isAuthenticated } = useAuth();
 
-  // Placeholder data
-  const { username, caption, audio, likes, comments, shares } = post;
+  const [isLiked, setIsLiked] = useState(video?.isLiked || false);
+  const [likeCount, setLikeCount] = useState(video?.likeCount || 0);
 
-  const handleLikeClick = () => {
-    setLiked(!liked);
+  const getVideoUrl = (url) => {
+    if (!url) return "";
+
+    if (url.startsWith("http")) {
+      return url;
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    const serverUrl = baseUrl.replace("/api", "");
+
+    return `${serverUrl}${url}`;
   };
 
+  async function handleLike() {
+    if (!isAuthenticated) {
+      toast.error("Please log in to like videos");
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        await unlikeVideo(video.id);
+        setIsLiked(false);
+        setLikeCount((prev) => prev - 1);
+      } else {
+        await likeVideo(video.id);
+        setIsLiked(true);
+        setLikeCount((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.log("Like error:", error);
+      toast.error("Failed to update like");
+    }
+  }
+
   return (
-    <div className="flex py-6 border-b">
-      {/* User avatar */}
-      <div className="mr-3">
-        <div className="h-12 w-12 rounded-full bg-gray-300"></div>
-      </div>
+    <div className="flex gap-4 border-b py-6">
+      {/* Avatar */}
+      <div className="h-12 w-12 rounded-full bg-gray-300"></div>
 
-      <div className="flex-1">
-        {/* User info and caption */}
+      {/* Content */}
+      <div>
         <div className="mb-2">
-          <span className="font-bold hover:underline cursor-pointer">{username}</span>
-          <span className="text-sm ml-1"> · 2d ago</span>
-          <p className="text-sm mt-1">{caption}</p>
+          <Link href={`/profile/${video?.user?.id}`}>
+            <span className="font-bold">
+              @{video?.user?.username || "unknown"}
+            </span>
+          </Link>
+
+          <p>{video?.caption}</p>
+
+          <p className="flex items-center gap-2 text-sm">
+            <FaMusic />
+            Original Sound - {video?.user?.username || "User"}
+          </p>
         </div>
 
-        {/* Audio info */}
-        <div className="flex items-center text-sm mb-3">
-          <FaMusic className="mr-2 text-xs" />
-          <span className="truncate max-w-[250px]">{audio}</span>
-        </div>
-
-        <div className="flex">
-          {/* Video container */}
-          <div className="mr-5 w-[300px] h-[530px] bg-black rounded-md flex items-center justify-center relative overflow-hidden">
-            <p className="text-white">Video Placeholder</p>
-            <div className="absolute bottom-4 left-4 text-white text-sm">
-              <p className="mb-1">▶ 30</p>
-            </div>
+        <div className="flex items-end gap-4">
+          <div className="bg-black rounded-md overflow-hidden w-[360px] h-[620px] flex items-center justify-center">
+            {video?.videoUrl ? (
+              <video
+                src={getVideoUrl(video.videoUrl)}
+                controls
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <p className="text-white">Video Placeholder</p>
+            )}
           </div>
 
-          {/* Interaction buttons */}
-          <div className="flex flex-col justify-end space-y-3 py-2">
-            {/* Like button */}
-            <button
-              className="flex flex-col items-center"
-              onClick={handleLikeClick}
-            >
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                {liked ? (
-                  <FaHeart className="text-red-500" />
-                ) : (
-                  <FaRegHeart />
-                )}
+          <div className="flex flex-col gap-4 text-center">
+            <button onClick={handleLike}>
+              <div className="bg-gray-100 rounded-full p-4">
+                <FaHeart className={isLiked ? "text-red-500" : ""} />
               </div>
-              <span className="text-xs mt-1">{liked ? likes + 1 : likes}</span>
+              <p>{likeCount}</p>
             </button>
 
-            {/* Comment button */}
-            <button className="flex flex-col items-center">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+            <button>
+              <div className="bg-gray-100 rounded-full p-4">
                 <FaComment />
               </div>
-              <span className="text-xs mt-1">{comments}</span>
+              <p>{video?.commentCount || 0}</p>
             </button>
 
-            {/* Share button */}
-            <button className="flex flex-col items-center">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+            <button>
+              <div className="bg-gray-100 rounded-full p-4">
                 <FaShare />
               </div>
-              <span className="text-xs mt-1">{shares}</span>
+              <p>{video?.shareCount || 0}</p>
             </button>
           </div>
         </div>

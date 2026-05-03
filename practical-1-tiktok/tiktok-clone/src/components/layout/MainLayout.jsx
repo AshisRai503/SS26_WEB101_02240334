@@ -1,12 +1,18 @@
 'use client';
 
+import { useState } from 'react';
+import { useAuth } from '@/contexts/authContext';
+import AuthModal from '../auth/AuthModal';
 import Link from 'next/link';
 import {
   FaHome, FaUserFriends, FaCompass, FaVideo,
-  FaInbox, FaRegUser, FaPlus
+  FaRegUser, FaPlus
 } from 'react-icons/fa';
 
 export default function MainLayout({ children }) {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -29,23 +35,25 @@ export default function MainLayout({ children }) {
               </Link>
             </li>
 
-            <li>
-              <Link
-                href="/following"
-                className="flex items-center p-3 hover:bg-gray-100 rounded-md mx-2"
-              >
-                <FaUserFriends className="text-xl mr-3" />
-                <span>Following</span>
-              </Link>
-            </li>
+            {isAuthenticated && (
+              <li>
+                <Link
+                  href="/following"
+                  className="flex items-center p-3 hover:bg-gray-100 rounded-md mx-2"
+                >
+                  <FaUserFriends className="text-xl mr-3" />
+                  <span>Following</span>
+                </Link>
+              </li>
+            )}
 
             <li>
               <Link
-                href="/explore"
+                href="/explore-users"
                 className="flex items-center p-3 hover:bg-gray-100 rounded-md mx-2"
               >
                 <FaCompass className="text-xl mr-3" />
-                <span>Explore</span>
+                <span>Explore Users</span>
               </Link>
             </li>
 
@@ -76,15 +84,33 @@ export default function MainLayout({ children }) {
         </div>
 
         <div className="px-3 py-4 mt-2">
-          <p className="text-sm text-gray-500 mb-4">
-            Log in to follow creators, like videos, and view comments.
-          </p>
-          <Link href="/login">
-            <button className="w-full py-2 px-4 border rounded-md font-medium mb-2">
-            Login
-          </button>
-          </Link>
+          {isAuthenticated ? (
+            <div>
+              <p className="text-sm text-gray-500 mb-2">
+                Logged in as {user?.username || user?.email || 'User'}
+              </p>
 
+              <button
+                onClick={logout}
+                className="w-full py-2 px-4 border rounded-md font-medium mb-2"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm text-gray-500 mb-4">
+                Log in to follow creators, like videos, and view comments.
+              </p>
+
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="w-full py-2 px-4 border rounded-md font-medium mb-2"
+              >
+                Login
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="border-t px-3 py-4 text-xs text-gray-500">
@@ -111,25 +137,41 @@ export default function MainLayout({ children }) {
             </div>
 
             <div className="w-1/3 flex justify-end items-center space-x-4">
-              <Link href="/upload">
-                <button className="border px-3 py-1 rounded-md hover:bg-gray-50 flex items-center">
-                  <FaPlus className="mr-2" /> Upload
-                </button>
-              </Link>
+              {isAuthenticated && (
+                <Link href="/upload">
+                  <button className="border px-3 py-1 rounded-md hover:bg-gray-50 flex items-center">
+                    <FaPlus className="mr-2" /> Upload
+                  </button>
+                </Link>
+              )}
 
-              <Link href="/login">
-                <button className="bg-red-500 text-white px-6 py-1 rounded-md">
-                Log in
-              </button>
-              </Link>  
-              
-              <Link
-                href="/profile"
-                className="flex items-center p-3 hover:bg-gray-100 rounded-md mx-2"
-              >
-                <FaRegUser className="text-xl mr-3" />
-                <span>Profile</span>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  {user?.id && (
+                    <Link
+                      href={`/profile/${user.id}`}
+                      className="flex items-center p-3 hover:bg-gray-100 rounded-md mx-2"
+                    >
+                      <FaRegUser className="text-xl mr-3" />
+                      <span>Profile</span>
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={logout}
+                    className="bg-red-500 text-white px-6 py-1 rounded-md"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="bg-red-500 text-white px-6 py-1 rounded-md"
+                >
+                  Log in
+                </button>
+              )}
             </div>
           </header>
 
@@ -137,6 +179,11 @@ export default function MainLayout({ children }) {
           <main>{children}</main>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 }
