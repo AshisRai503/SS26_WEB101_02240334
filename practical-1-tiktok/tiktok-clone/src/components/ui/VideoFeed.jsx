@@ -1,69 +1,111 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import VideoCard from "./VideoCard";
 import { getVideos, getFollowingVideos } from "@/services/videoService";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+import { useAuth } from "@/contexts/authContext";
 
 export default function VideoFeed({ type = "foryou" }) {
-  const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { isAuthenticated } = useAuth();
 
-  async function fetchVideos() {
-    try {
-      setLoading(true);
-      setError("");
+  const [loadMoreRef, isLoadMoreVisible] = useIntersectionObserver({
+    threshold: 0.1,
+  });
 
-      let data;
+  const fetchVideos = ({ pageParam }) => {
+    if (type === "following") {
+      return getFollowingVideos({ cursor: pageParam });
+    }
 
-      if (type === "following") {
-        data = await getFollowingVideos();
-      } else {
-        data = await getVideos();
+    return getVideos({ cursor: pageParam });
+  };
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ["videos", type],
+    queryFn: fetchVideos,
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage?.pagination?.hasNextPage) {
+        return undefined;
       }
 
-      setVideos(data.videos || data || []);
-    } catch (err) {
-      console.log("Video fetch error:", err);
-      setError("Failed to load videos.");
-    } finally {
-      setLoading(false);
-    }
-  }
+      return lastPage.pagination.nextCursor;
+    },
+    enabled: type !== "following" || isAuthenticated,
+  });
 
   useEffect(() => {
-    fetchVideos();
-  }, [type]);
+    if (isLoadMoreVisible && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [isLoadMoreVisible, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (loading) {
+  if (type === "following" && !isAuthenticated) {
     return (
-      <div className="p-6 text-center">
-        <p>Loading videos...</p>
+      <div className="flex min-h-[400px] items-center justify-center text-gray-500">
+        Please log in to view videos from people you follow.
       </div>
     );
   }
 
-  if (error) {
+  if (status === "pending") {
     return (
-      <div className="p-6 text-center">
-        <p className="text-red-500">{error}</p>
+      <div className="flex min-h-[400px] items-center justify-center text-gray-500">
+        Loading videos...
       </div>
     );
   }
+
+  if (status === "error") {
+    console.log("Video fetch error:", error);
+
+    return (
+      <div className="flex min-h-[400px] items-center justify-center text-red-500">
+        Failed to load videos.
+      </div>
+    );
+  }
+
+  const videos = data?.pages?.flatMap((page) => page.videos || []) || [];
 
   if (videos.length === 0) {
     return (
-      <div className="p-6 text-center">
-        <p>No videos found.</p>
+      <div className="flex min-h-[400px] items-center justify-center text-gray-500">
+        No videos found.
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="flex w-full flex-col items-center">
       {videos.map((video) => (
         <VideoCard key={video.id} video={video} />
       ))}
+
+      {isFetchingNextPage && (
+        <div className="py-6 text-center text-gray-500">
+          Loading more videos...
+        </div>
+      )}
+
+      {hasNextPage && !isFetchingNextPage && (
+        <div ref={loadMoreRef} className="h-10" />
+      )}
+
+      {!hasNextPage && (
+        <div className="py-6 text-center text-gray-400">
+          You have reached the end of the feed.
+        </div>
+      )}
     </div>
   );
 }
