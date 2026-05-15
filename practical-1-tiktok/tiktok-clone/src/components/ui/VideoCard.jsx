@@ -75,6 +75,7 @@ export default function VideoCard({ video }) {
             {video?.videoUrl ? (
               <video
                 src={getVideoUrl(video.videoUrl)}
+                poster={getVideoUrl(video.thumbnailURL)}
                 controls
                 className="w-full h-full object-cover"
               />

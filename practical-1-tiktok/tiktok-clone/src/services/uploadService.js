@@ -1,25 +1,23 @@
-import supabase from '../lib/supabase';
-import apiClient from '../lib/api-config';
+import supabase from "../lib/supabase";
+import apiClient from "../lib/api-config";
 
-// Generate a unique file name
 const generateUniqueFileName = (originalName) => {
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 10);
-  const extension = originalName.split('.').pop();
+  const extension = originalName.split(".").pop();
 
   return `${timestamp}-${randomStr}.${extension}`;
 };
 
-// Upload video directly to Supabase from the browser
 export const uploadVideoToStorage = async (userId, file) => {
   try {
     const fileName = generateUniqueFileName(file.name);
     const filePath = `user-${userId}/${fileName}`;
 
     const { error } = await supabase.storage
-      .from('videos')
+      .from("videos")
       .upload(filePath, file, {
-        cacheControl: '3600',
+        cacheControl: "3600",
         upsert: false,
       });
 
@@ -28,7 +26,7 @@ export const uploadVideoToStorage = async (userId, file) => {
     }
 
     const { data: urlData } = supabase.storage
-      .from('videos')
+      .from("videos")
       .getPublicUrl(filePath);
 
     return {
@@ -36,21 +34,20 @@ export const uploadVideoToStorage = async (userId, file) => {
       storagePath: filePath,
     };
   } catch (error) {
-    console.error('Error uploading video to Supabase:', error);
+    console.error("Error uploading video to Supabase:", error);
     throw error;
   }
 };
 
-// Upload thumbnail directly to Supabase from the browser
 export const uploadThumbnailToStorage = async (userId, file) => {
   try {
     const fileName = generateUniqueFileName(file.name);
     const filePath = `user-${userId}/${fileName}`;
 
     const { error } = await supabase.storage
-      .from('thumbnails')
+      .from("thumbnails")
       .upload(filePath, file, {
-        cacheControl: '3600',
+        cacheControl: "3600",
         upsert: false,
       });
 
@@ -59,7 +56,7 @@ export const uploadThumbnailToStorage = async (userId, file) => {
     }
 
     const { data: urlData } = supabase.storage
-      .from('thumbnails')
+      .from("thumbnails")
       .getPublicUrl(filePath);
 
     return {
@@ -67,18 +64,17 @@ export const uploadThumbnailToStorage = async (userId, file) => {
       storagePath: filePath,
     };
   } catch (error) {
-    console.error('Error uploading thumbnail to Supabase:', error);
+    console.error("Error uploading thumbnail to Supabase:", error);
     throw error;
   }
 };
 
-// Create video record in backend database
 export const createVideo = async (videoData) => {
   try {
-    const response = await apiClient.post('/videos', videoData);
+    const response = await apiClient.post("/videos", videoData);
     return response.data;
   } catch (error) {
-    console.error('Error creating video:', error);
+    console.error("Error creating video:", error);
     throw error;
   }
 };

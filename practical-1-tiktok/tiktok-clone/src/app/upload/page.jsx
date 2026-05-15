@@ -1,18 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
 import { useAuth } from "@/contexts/authContext";
-import apiClient from "@/lib/api-config";
+import {
+  uploadVideoToStorage,
+  uploadThumbnailToStorage,
+  createVideo,
+} from "@/services/uploadService";
 import toast from "react-hot-toast";
 
 export default function UploadPage() {
-  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
 
   const [caption, setCaption] = useState("");
   const [video, setVideo] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   async function handleUpload(e) {
     e.preventDefault();
@@ -29,29 +36,51 @@ export default function UploadPage() {
 
     try {
       setLoading(true);
+      setProgress(0);
 
-      const formData = new FormData();
-      formData.append("caption", caption);
-      formData.append("video", video);
+      const uploadToast = toast.loading("Uploading video...");
+
+      // Step 1: Upload video directly to Supabase
+      const videoUploadResult = await uploadVideoToStorage(user.id, video);
+      setProgress(50);
+
+      // Step 2: Upload thumbnail to Supabase if selected
+      let thumbnailUploadResult = null;
 
       if (thumbnail) {
-        formData.append("thumbnail", thumbnail);
+        thumbnailUploadResult = await uploadThumbnailToStorage(
+          user.id,
+          thumbnail
+        );
       }
 
-      await apiClient.post("/videos", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      setProgress(75);
 
-      toast.success("Video uploaded successfully");
+      // Step 3: Save video information in backend database
+      const videoData = {
+        caption,
+        videoUrl: videoUploadResult.url,
+        videoStoragePath: videoUploadResult.storagePath,
+      };
+
+      if (thumbnailUploadResult) {
+        videoData.thumbnailUrl = thumbnailUploadResult.url;
+        videoData.thumbnailStoragePath = thumbnailUploadResult.storagePath;
+      }
+
+      await createVideo(videoData);
+
+      setProgress(100);
+      toast.success("Video uploaded successfully", { id: uploadToast });
 
       setCaption("");
       setVideo(null);
       setThumbnail(null);
+
+      router.push("/");
     } catch (error) {
       console.log("Upload error:", error);
-      toast.error("Upload failed");
+      toast.error(error.message || "Upload failed");
     } finally {
       setLoading(false);
     }
@@ -59,7 +88,7 @@ export default function UploadPage() {
 
   return (
     <MainLayout>
-      <div className="p-6 max-w-xl">
+      <div className="max-w-xl mx-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Upload Video</h1>
 
         {!isAuthenticated ? (
@@ -73,6 +102,7 @@ export default function UploadPage() {
                 onChange={(e) => setCaption(e.target.value)}
                 className="w-full border rounded p-2"
                 placeholder="Write a caption..."
+                rows="4"
               />
             </div>
 
@@ -98,7 +128,14 @@ export default function UploadPage() {
               />
             </div>
 
+            {loading && (
+              <p className="text-sm text-gray-600">
+                Uploading: {progress}%
+              </p>
+            )}
+
             <button
+              type="submit"
               disabled={loading}
               className="bg-red-500 text-white px-6 py-2 rounded-md disabled:opacity-50"
             >
