@@ -1,14 +1,14 @@
 "use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import MainLayout from "@/components/layout/MainLayout";
-import { useAuth } from "@/contexts/authContext";
 import {
   uploadVideoToStorage,
   uploadThumbnailToStorage,
   createVideo,
 } from "@/services/uploadService";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import MainLayout from "@/components/layout/MainLayout";
+import { useAuth } from "@/contexts/authContext";
+
 import toast from "react-hot-toast";
 
 export default function UploadPage() {
